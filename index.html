@@ -1,0 +1,847 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#194a46">
+<title>Mi Bienestar | Un día a la vez</title>
+<style>
+:root{
+  --verde:#194a46;
+  --menta:#e5f1eb;
+  --rosa:#efc0b5;
+  --fondo:#faf6f2;
+  --texto:#293b38;
+  --borde:#e8e1db;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--fondo);
+  color:var(--texto);
+  font:17px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+header{
+  background:linear-gradient(120deg,#194a46,#348477);
+  color:white;
+  padding:34px 22px;
+  border-radius:0 0 30px 30px;
+}
+header .inner,main{max-width:1000px;margin:auto}
+h1{font-size:clamp(34px,6vw,52px);margin:8px 0}
+h2{color:var(--verde);font-size:24px}
+h3{color:var(--verde);margin-bottom:8px}
+p,li{line-height:1.6}
+header p{color:#e7f3ee}
+main{padding:18px 15px 100px}
+nav{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  position:sticky;
+  top:0;
+  background:var(--fondo);
+  padding:12px 0;
+  z-index:5;
+}
+button{
+  border:0;
+  border-radius:13px;
+  background:var(--verde);
+  color:white;
+  padding:12px 16px;
+  font:inherit;
+  font-weight:650;
+  cursor:pointer;
+}
+nav button{
+  background:white;
+  color:var(--verde);
+  white-space:nowrap;
+}
+nav button.active,.selected{background:var(--verde)!important;color:white!important}
+.card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:22px;
+  padding:21px;
+  margin:13px 0;
+  box-shadow:0 3px 12px #123a3208;
+}
+.view{display:none}
+.view.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.muted{color:#697973;font-size:15px}
+.notice{
+  padding:15px;
+  border-radius:15px;
+  background:#fff1e6;
+  border:1px solid #f0d4bd;
+  line-height:1.6;
+}
+.good{background:var(--menta);border-color:#c9e3d5}
+label{display:block;margin:13px 0;font-weight:600}
+input:not([type=checkbox]),textarea,select{
+  display:block;
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border:1px solid #cdd9d1;
+  border-radius:12px;
+  font:inherit;
+  background:white;
+}
+input[type=checkbox]{width:22px;height:22px;accent-color:#348477}
+.check{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  background:#f6faf7;
+  border-radius:12px;
+  font-weight:500;
+}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.days button{padding:12px 2px;background:var(--menta);color:var(--verde)}
+.meal{padding:14px 0;border-bottom:1px solid var(--borde)}
+summary{cursor:pointer;font-weight:700;color:var(--verde);font-size:18px}
+details{padding:15px 0;border-bottom:1px solid var(--borde)}
+small,.tag{font-size:13px}
+.tag{
+  display:inline-block;
+  padding:7px 11px;
+  border-radius:20px;
+  background:var(--menta);
+  color:var(--verde);
+  font-weight:700;
+}
+.exercise-icon{
+  font-size:50px;
+  background:var(--menta);
+  padding:13px;
+  border-radius:15px;
+}
+.stat{background:var(--menta);border-radius:16px;padding:18px}
+.stat strong{display:block;font-size:30px;color:var(--verde)}
+table{width:100%;border-collapse:collapse}
+td,th{border-bottom:1px solid var(--borde);padding:11px;text-align:left}
+a{color:#24786c}
+footer{text-align:center;padding:30px;color:#6d8079}
+@media(max-width:650px){
+ .grid{grid-template-columns:1fr}
+ .card{padding:17px}
+ .days{gap:3px}
+ .days button{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="inner">
+  <small>MI ESPACIO PERSONAL DE SALUD</small>
+  <h1>Mi Bienestar ♥</h1>
+  <p>Alimentarme mejor, recuperar mi fuerza y celebrar cada pequeño avance.</p>
+  <span id="fecha"></span>
+</div>
+</header>
+
+<main>
+<nav id="tabs">
+  <button onclick="go('hoy')" class="active">☀️ Hoy</button>
+  <button onclick="go('menu')">🥗 Mi menú</button>
+  <button onclick="go('ejercicios')">🪑 Ejercicios</button>
+  <button onclick="go('progreso')">📈 Progreso</button>
+  <button onclick="go('guia')">💗 Mi guía</button>
+</nav>
+
+<section id="hoy" class="view active">
+  <div class="card">
+    <span class="tag">Mi plan de hoy</span>
+    <h2 id="tituloHoy"></h2>
+    <div id="comidasHoy"></div>
+    <button onclick="go('menu')">Ver ingredientes y recetas →</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Mis pequeñas victorias 🌷</h2>
+      <p>Marca lo que lograste hoy. Cada avance cuenta.</p>
+      <div id="habitos"></div>
+    </div>
+    <div class="card">
+      <h2>¿Cómo me siento?</h2>
+      <label>Dolor (0 a 10)
+        <input id="dolor" type="range" min="0" max="10"
+          oninput="valorDolor.textContent=this.value"
+          onchange="guardarDia()">
+      </label>
+      <p>Dolor: <strong id="valorDolor">0</strong>/10</p>
+      <label>Mi energía
+        <select id="energia" onchange="guardarDia()">
+          <option value="">Seleccionar</option>
+          <option>Muy baja</option>
+          <option>Baja</option>
+          <option>Regular</option>
+          <option>Buena</option>
+        </select>
+      </label>
+      <label>Algo bueno de hoy
+        <textarea id="nota" rows="3"
+          onchange="guardarDia()"
+          placeholder="Hoy me sentí..."></textarea>
+      </label>
+    </div>
+  </div>
+  <div class="notice">
+    <strong>Mi seguridad es primero.</strong> Por las caídas y la
+    debilidad progresiva, es importante solicitar una valoración
+    de medicina física y rehabilitación sin esperar cuatro meses.
+  </div>
+</section>
+
+<section id="menu" class="view">
+  <div class="card">
+    <h2>Mi alimentación semanal 🥗</h2>
+    <p>Selecciona el día que quieras consultar.</p>
+    <div id="dias" class="days"></div>
+  </div>
+  <div class="card">
+    <div id="recetas"></div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h2>🍎 Si tengo hambre</h2>
+      <p>Puedo elegir una colación si la necesito:</p>
+      <ul>
+        <li>Yogur natural sin azúcar.</li>
+        <li>Manzana pequeña con cacahuates sin sal.</li>
+        <li>Pepino o jícama con limón.</li>
+        <li>Guayaba con huevo cocido.</li>
+      </ul>
+      <p class="muted">No debo hacer ayunos o reducir drásticamente
+      las comidas sin revisar mis medicamentos para diabetes.</p>
+    </div>
+    <div class="card">
+      <h2>🛒 Lista de compras</h2>
+      <div id="compras"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Mi plato equilibrado</h2>
+    <p>🥬 <strong>½ plato:</strong> verduras.</p>
+    <p>🥚 <strong>¼ plato:</strong> proteínas.</p>
+    <p>🌽 <strong>¼ plato:</strong> alimentos con carbohidratos.</p>
+    <p>💧 Mi bebida habitual será agua simple.</p>
+    <p class="muted">Los frijoles y las lentejas también contienen
+    carbohidratos. Las porciones deben ajustarse a mi peso,
+    glucosa, medicamentos y función renal.</p>
+  </div>
+</section>
+
+<section id="ejercicios" class="view">
+  <div class="card">
+    <h2>Mi movilidad 🪑</h2>
+    <div class="notice">
+      Estos movimientos son una propuesta para revisar con un
+      fisiatra o fisioterapeuta. Por mis caídas y pérdida de fuerza,
+      necesito saber cuáles son seguros antes de practicarlos.
+    </div>
+    <p>Los ejercicios están disponibles para consultarlos.
+    También puedo marcar los que realice.</p>
+    <p class="muted">Usar una silla estable con respaldo y sin ruedas,
+    estar acompañada y detenerme si siento dolor mayor,
+    mareo, debilidad o falta de aire.</p>
+  </div>
+  <div id="listaEjercicios"></div>
+  <div class="card">
+    <h2>🎥 Videos de apoyo</h2>
+    <p>Estos videos son referencias educativas. No tengo que
+    realizar las rutinas completas.</p>
+    <p><a href="https://www.youtube.com/watch?v=876pxxop_bw"
+      target="_blank" rel="noopener">Ver ejercicios de fisioterapia sentada</a></p>
+    <p><a href="https://www.youtube.com/watch?v=GGvr3ucsQpM"
+      target="_blank" rel="noopener">Ver ejercicios de movilidad de pies</a></p>
+  </div>
+</section>
+
+<section id="progreso" class="view">
+  <div class="card">
+    <h2>Mis avances 📈</h2>
+    <div class="grid">
+      <div class="stat"><strong id="diasRegistrados">0</strong>Días registrados</div>
+      <div class="stat"><strong id="pesoActual">—</strong>Último peso</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Registrar mis medidas</h2>
+    <label>Fecha<input id="registroFecha" type="date"></label>
+    <div class="grid">
+      <label>Peso (kg)<input id="peso" type="number" min="20" max="350" step=".1"></label>
+      <label>Glucosa (mg/dL)<input id="glucosa" type="number" min="20" max="700"></label>
+      <label>Presión sistólica<input id="sistolica" type="number" min="50" max="300"></label>
+      <label>Presión diastólica<input id="diastolica" type="number" min="30" max="200"></label>
+    </div>
+    <label>¿Qué logré esta semana?
+      <textarea id="logro" rows="3"
+        placeholder="Pude levantarme con menos esfuerzo..."></textarea>
+    </label>
+    <button onclick="registrar()">Guardar registro ♥</button>
+  </div>
+  <div class="card">
+    <h2>Mi historial</h2>
+    <div id="historial"></div>
+  </div>
+  <div class="card">
+    <h2>Mis metas de cuatro meses 🌷</h2>
+    <p><strong>Mes 1:</strong> Organizar mis comidas,
+    revisar mi salud e iniciar movilidad autorizada.</p>
+    <p><strong>Mes 2:</strong> Trabajar gradualmente la
+    fuerza y tolerancia al movimiento con rehabilitación.</p>
+    <p><strong>Mes 3:</strong> Buscar mayor facilidad en
+    mis actividades y mejorar mi estabilidad.</p>
+    <p><strong>Mes 4:</strong> Comparar peso, fuerza,
+    dolor, glucosa y movilidad con mi equipo médico.</p>
+    <p class="muted">No necesito perder cierta cantidad
+    de kilos para reconocer mis avances.</p>
+  </div>
+</section>
+
+<section id="guia" class="view">
+  <div class="card">
+    <h2>Mis recomendaciones 💗</h2>
+    <h3>Alimentación</h3>
+    <p>Comer de forma regular, incluir proteínas y verduras,
+    moderar la sal y evitar bebidas azucaradas.</p>
+    <h3>Diabetes</h3>
+    <p>Registrar mi glucosa según las indicaciones médicas.
+    Si tomo insulina o medicamentos que pueden bajarla,
+    necesito revisar cualquier cambio de alimentación o actividad.</p>
+    <h3>Hipotiroidismo</h3>
+    <p>Tomar mis medicamentos como los indicó mi médico.
+    No cambiar las dosis por mi cuenta.</p>
+    <h3>Movilidad</h3>
+    <p>Buscar rehabilitación y prevención de caídas.
+    No hacer ejercicios de pie sin valoración.</p>
+    <h3>Señales importantes</h3>
+    <p>Buscar atención urgente ante debilidad nueva intensa,
+    pérdida del control de orina o evacuaciones, o
+    adormecimiento en la entrepierna. También ante
+    hinchazón repentina, calor y dolor importante de una pierna.</p>
+  </div>
+
+  <div class="card">
+    <h2>Mis datos y respaldos</h2>
+    <p>Mis registros se guardan en este navegador. Es importante
+    hacer respaldos, ya que se pueden perder si borro
+    los datos de Safari o cambio de dispositivo.</p>
+    <button onclick="exportar()">Descargar respaldo</button>
+    <label>Restaurar respaldo
+      <input type="file" accept=".json,application/json"
+        onchange="importar(event)">
+    </label>
+  </div>
+
+  <div class="card">
+    <h2>Fuentes y orientación</h2>
+    <p><a href="https://diabetes.org/food-nutrition/understanding-carbs/create-your-plate"
+      target="_blank" rel="noopener">Asociación Americana de Diabetes: método del plato</a></p>
+    <p><a href="https://www.nhs.uk/live-well/exercise/strength-exercises/"
+      target="_blank" rel="noopener">NHS: ejercicios de fuerza</a></p>
+    <p>Esta aplicación no sustituye la atención médica,
+    nutricional ni la rehabilitación individual.</p>
+  </div>
+</section>
+</main>
+
+<footer>Mi Bienestar ♥ — Un día a la vez</footer>
+
+<script>
+"use strict";
+
+const diasSemana=[
+  "Domingo","Lunes","Martes","Miércoles",
+  "Jueves","Viernes","Sábado"
+];
+
+const recetas={
+ huevosNopales:{
+  nombre:"Huevos con nopales",
+  ingredientes:["2 huevos","Nopales cocidos","1 tortilla de maíz"],
+  pasos:[
+   "Lavar y cortar los nopales.",
+   "Cocinarlos hasta que estén tiernos.",
+   "Agregar los huevos y cocinar bien.",
+   "Servir con una tortilla."
+  ]
+ },
+ polloCalabaza:{
+  nombre:"Pollo con calabacitas y arroz",
+  ingredientes:["Una palma de pollo","Calabacitas","½ taza de arroz cocido"],
+  pasos:[
+   "Cocer completamente el pollo.",
+   "Cortar las calabacitas y cocinarlas con un poco de aceite.",
+   "Preparar el arroz con poca sal.",
+   "Servir una porción de cada alimento."
+  ]
+ },
+ sopaQuesadilla:{
+  nombre:"Sopa de verduras y quesadilla",
+  ingredientes:["Verduras variadas","1 tortilla","Queso panela"],
+  pasos:[
+   "Hervir verduras picadas hasta que estén suaves.",
+   "Calentar la tortilla y agregar queso panela.",
+   "Servir con la sopa."
+  ]
+ },
+ avena:{
+  nombre:"Avena natural con leche y huevo",
+  ingredientes:["⅓ taza de avena cruda","Leche sin azúcar","Canela","1 huevo"],
+  pasos:[
+   "Cocinar la avena en la leche con canela.",
+   "Cocer el huevo por separado.",
+   "Servir sin agregar azúcar."
+  ]
+ },
+ lentejas:{
+  nombre:"Lentejas con verduras",
+  ingredientes:["¾ taza de lentejas cocidas","Zanahoria","Jitomate","Cebolla"],
+  pasos:[
+   "Lavar y cocer las lentejas.",
+   "Agregar verduras picadas.",
+   "Cocinar hasta que estén suaves.",
+   "Acompañar con ensalada; ajustar las porciones de otros carbohidratos."
+  ]
+ },
+ tostadaPollo:{
+  nombre:"Tostada de pollo",
+  ingredientes:["Pollo cocido deshebrado","Lechuga","1–2 tostadas horneadas pequeñas"],
+  pasos:[
+   "Deshebrar el pollo completamente cocido.",
+   "Lavar y picar la lechuga.",
+   "Colocar el pollo y las verduras sobre las tostadas."
+  ]
+ },
+ huevosMexicana:{
+  nombre:"Huevos a la mexicana",
+  ingredientes:["2 huevos","Jitomate","Cebolla","1 tortilla"],
+  pasos:[
+   "Picar jitomate y cebolla.",
+   "Cocinarlos con poco aceite.",
+   "Agregar los huevos y cocinar completamente.",
+   "Servir con una tortilla."
+  ]
+ },
+ polloNopales:{
+  nombre:"Pollo con nopales",
+  ingredientes:["Una palma de pollo","Nopales","1 tortilla"],
+  pasos:[
+   "Cocer bien el pollo.",
+   "Cocinar los nopales por separado.",
+   "Servir juntos con una tortilla."
+  ]
+ },
+ sardinas:{
+  nombre:"Ensalada de sardinas",
+  ingredientes:["Sardinas en agua, preferiblemente bajas en sodio","Lechuga o repollo","Pepino","2 tostadas pequeñas"],
+  pasos:[
+   "Escurrir las sardinas.",
+   "Lavar y picar las verduras.",
+   "Mezclar y servir con las tostadas."
+  ]
+ },
+ avenaYogur:{
+  nombre:"Avena con yogur",
+  ingredientes:["⅓ taza de avena","Yogur natural sin azúcar"],
+  pasos:[
+   "Cocer la avena y dejarla enfriar.",
+   "Mezclar con yogur natural.",
+   "Agregar canela si se desea."
+  ]
+ },
+ frijolesHuevo:{
+  nombre:"Frijoles con huevo y ensalada",
+  ingredientes:["½ taza de frijoles cocidos","1–2 huevos","Repollo y jitomate"],
+  pasos:[
+   "Calentar los frijoles sin agregar manteca.",
+   "Cocinar los huevos completamente.",
+   "Preparar una ensalada de verduras.",
+   "Servir y ajustar la porción de tortilla si se añade."
+  ]
+ },
+ caldoPollo:{
+  nombre:"Caldo de pollo con verduras",
+  ingredientes:["Pollo","Chayote","Calabacita","Zanahoria"],
+  pasos:[
+   "Cocer bien el pollo en agua.",
+   "Agregar verduras limpias y picadas.",
+   "Cocinar hasta que estén suaves.",
+   "Usar especias y poca sal."
+  ]
+ },
+ quesadilla:{
+  nombre:"Quesadilla de panela con pico de gallo",
+  ingredientes:["1 tortilla de maíz","Queso panela","Jitomate y cebolla"],
+  pasos:[
+   "Calentar la tortilla con queso panela.",
+   "Picar jitomate y cebolla.",
+   "Servir con pico de gallo."
+  ]
+ },
+ polloChayote:{
+  nombre:"Pollo con chayote y arroz",
+  ingredientes:["Una palma de pollo","Chayote","½ taza de arroz cocido"],
+  pasos:[
+   "Cocer el pollo completamente.",
+   "Pelar, cortar y cocer el chayote.",
+   "Cocinar el arroz usando poca sal.",
+   "Servir las porciones indicadas."
+  ]
+ },
+ huevosVerduras:{
+  nombre:"Huevos revueltos con verduras",
+  ingredientes:["2 huevos","Calabacita o espinaca","Jitomate"],
+  pasos:[
+   "Lavar y cortar las verduras.",
+   "Cocinarlas con poco aceite.",
+   "Agregar los huevos y cocinar completamente."
+  ]
+ },
+ huevosEspinaca:{
+  nombre:"Huevos con espinacas",
+  ingredientes:["2 huevos","Espinaca","1 tortilla"],
+  pasos:[
+   "Lavar y cocinar la espinaca.",
+   "Agregar huevos y cocinar completamente.",
+   "Servir con una tortilla."
+  ]
+ },
+ lentejasQueso:{
+  nombre:"Sopa de lentejas con ensalada y queso",
+  ingredientes:["¾ taza de lentejas cocidas","Verduras","Queso fresco bajo en sal"],
+  pasos:[
+   "Cocer lentejas con verduras.",
+   "Preparar una ensalada fresca.",
+   "Servir con una porción moderada de queso."
+  ]
+ },
+ tostadaFrijol:{
+  nombre:"Tostadas de frijol y nopales",
+  ingredientes:["1–2 tostadas pequeñas","½ taza de frijoles","Nopales cocidos","Queso fresco bajo en sal"],
+  pasos:[
+   "Machacar los frijoles.",
+   "Untarlos sobre las tostadas.",
+   "Agregar nopales cocidos y queso.",
+   "Considerar que frijoles y tostadas aportan carbohidratos."
+  ]
+ }
+};
+
+const menuSemanal={
+  1:["huevosNopales","polloCalabaza","sopaQuesadilla"],
+  2:["avena","lentejas","tostadaPollo"],
+  3:["huevosMexicana","polloNopales","sardinas"],
+  4:["avenaYogur","frijolesHuevo","caldoPollo"],
+  5:["quesadilla","polloChayote","huevosVerduras"],
+  6:["huevosEspinaca","lentejasQueso","tostadaFrijol"],
+  0:["avena","polloChayote","caldoPollo"]
+};
+
+const ejercicios=[
+ {
+  icono:"🦶",
+  nombre:"Puntas y talones",
+  instrucciones:"Sentada, con ambos pies apoyados, levantar las puntas y después los talones lentamente.",
+  dosis:"5 a 10 movimientos, si están autorizados."
+ },
+ {
+  icono:"🦵",
+  nombre:"Extender la rodilla",
+  instrucciones:"Sentada y con espalda apoyada, estirar suavemente una pierna hasta donde sea cómodo. Bajar y alternar.",
+  dosis:"3 a 5 veces por pierna, si está autorizado."
+ },
+ {
+  icono:"🪑",
+  nombre:"Marcha sentada",
+  instrucciones:"Levantar un pie apenas del suelo, apoyarlo y alternar con el otro. Mantener el torso estable.",
+  dosis:"3 a 5 movimientos por lado, si están autorizados."
+ },
+ {
+  icono:"🌷",
+  nombre:"Contraer los glúteos",
+  instrucciones:"Sentada, apretar suavemente los glúteos durante tres segundos y después relajar. No contener la respiración.",
+  dosis:"5 repeticiones, si están autorizadas."
+ }
+];
+
+const habitos=[
+ "Desayuné según mi plan",
+ "Comí según mi plan",
+ "Cené según mi plan",
+ "Tomé agua durante el día",
+ "Respeté mis indicaciones de actividad o descanso"
+];
+
+const compras=[
+ "Huevos, pollo y sardinas",
+ "Frijoles, lentejas y avena",
+ "Tortillas, arroz y tostadas horneadas",
+ "Nopales, calabacitas y chayote",
+ "Repollo, zanahoria, jitomate y cebolla",
+ "Fruta entera de temporada",
+ "Yogur natural y leche sin azúcar",
+ "Queso fresco bajo en sal"
+];
+
+const KEY="mi_bienestar_iPad_v1";
+let state;
+
+try{
+ state=JSON.parse(localStorage.getItem(KEY))||{};
+}catch(e){state={};}
+
+state.daily ||= {};
+state.logs ||= [];
+
+let diaElegido=new Date().getDay();
+
+function fechaLocal(){
+ const d=new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function guardar(){
+ try{
+  localStorage.setItem(KEY,JSON.stringify(state));
+ }catch(e){
+  alert("No se pudieron guardar los datos. Comprueba que Safari permite almacenamiento local.");
+ }
+}
+function seguro(texto){
+ return String(texto??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"
+ })[c]);
+}
+function go(id){
+ document.querySelectorAll(".view").forEach(v=>{
+  v.classList.toggle("active",v.id===id);
+ });
+ document.querySelectorAll("#tabs button").forEach(b=>{
+  b.classList.toggle("active",b.getAttribute("onclick")==`go('${id}')`);
+ });
+ if(id==="progreso")mostrarProgreso();
+ window.scrollTo(0,0);
+}
+
+function mostrarHoy(){
+ const now=new Date();
+ const key=fechaLocal();
+ const d=state.daily[key]||{};
+ const items=menuSemanal[now.getDay()];
+ fecha.textContent=now.toLocaleDateString("es-MX",{
+  day:"numeric",month:"long",year:"numeric"
+ });
+ tituloHoy.textContent=now.toLocaleDateString("es-MX",{
+  weekday:"long",day:"numeric",month:"long"
+ });
+ comidasHoy.innerHTML=items.map((id,i)=>`
+ <div class="meal">
+  <span class="tag">${["🌅 Desayuno","☀️ Comida","🌙 Cena"][i]}</span>
+  <h3>${recetas[id].nombre}</h3>
+ </div>`).join("");
+
+ habitos.innerHTML=habitosLista(d);
+
+ dolor.value=d.dolor??0;
+ valorDolor.textContent=d.dolor??0;
+ energia.value=d.energia||"";
+ nota.value=d.nota||"";
+}
+
+function habitosLista(d){
+ return habitos.map((h,i)=>`
+ <label class="check">
+  <input type="checkbox" ${d.habitos?.includes(i)?"checked":""}
+   onchange="marcarHabito(${i},this.checked)">
+  ${h}
+ </label>`).join("");
+}
+function marcarHabito(i,marcado){
+ const key=fechaLocal();
+ const d=state.daily[key]||{};
+ let lista=d.habitos||[];
+ lista=marcado?[...new Set([...lista,i])]:lista.filter(x=>x!==i);
+ d.habitos=lista;
+ state.daily[key]=d;
+ guardar();
+ mostrarHoy();
+}
+function guardarDia(){
+ const key=fechaLocal();
+ const d=state.daily[key]||{};
+ d.dolor=Number(dolor.value);
+ d.energia=energia.value;
+ d.nota=nota.value;
+ state.daily[key]=d;
+ guardar();
+}
+
+function mostrarMenu(){
+ dias.innerHTML=[1,2,3,4,5,6,0].map(n=>`
+  <button class="${n===diaElegido?"selected":""}"
+   onclick="elegirDia(${n})">${diasSemana[n].slice(0,3)}</button>
+ `).join("");
+
+ const tipos=["🌅 Desayuno","☀️ Comida","🌙 Cena"];
+ recetasDiv();
+ function recetasDiv(){
+  recetas.innerHTML=`
+   <span class="tag">${diasSemana[diaElegido]}</span>
+   <h2>¿Qué voy a preparar?</h2>
+   ${menuSemanal[diaElegido].map((id,i)=>{
+    const r=recetas[id];
+    return `<details ${i===0?"open":""}>
+      <summary>${tipos[i]}: ${r.nombre}</summary>
+      <h3>Ingredientes</h3>
+      <ul>${r.ingredientes.map(x=>`<li>${x}</li>`).join("")}</ul>
+      <h3>Preparación paso a paso</h3>
+      <ol>${r.pasos.map(x=>`<li>${x}</li>`).join("")}</ol>
+     </details>`;
+   }).join("")}`;
+ }
+}
+
+function elegirDia(n){
+ diaElegido=n;
+ mostrarMenu();
+}
+
+function mostrarEjercicios(){
+ listaEjercicios.innerHTML=ejercicios.map((e,i)=>{
+  const hechos=state.daily[fechaLocal()]?.ejercicios||[];
+  return `<article class="card">
+   <div class="row">
+    <span class="exercise-icon">${e.icono}</span>
+    <div><span class="tag">Ejercicio ${i+1}</span>
+    <h2>${e.nombre}</h2></div>
+   </div>
+   <h3>Cómo hacerlo</h3>
+   <p>${e.instrucciones}</p>
+   <p><strong>Referencia:</strong> ${e.dosis}</p>
+   <label class="check">
+    <input type="checkbox" ${hechos.includes(i)?"checked":""}
+     onchange="marcarEjercicio(${i},this.checked)">
+    Lo realicé hoy con seguridad
+   </label>
+  </article>`;
+ }).join("");
+}
+function marcarEjercicio(i,marcado){
+ const key=fechaLocal();
+ const d=state.daily[key]||{};
+ let hechos=d.ejercicios||[];
+ hechos=marcado?[...new Set([...hechos,i])]:hechos.filter(x=>x!==i);
+ d.ejercicios=hechos;
+ state.daily[key]=d;
+ guardar();
+}
+
+function registrar(){
+ const f=registroFecha.value;
+ if(!f)return alert("Selecciona una fecha.");
+ const s=sistolica.value,di=diastolica.value;
+ if(s&&di&&Number(s)<=Number(di)){
+  return alert("Revisa los valores de presión.");
+ }
+ const entry={
+  fecha:f,peso:peso.value,glucosa:glucosa.value,
+  sistolica:s,diastolica:di,logro:logro.value
+ };
+ state.logs=state.logs.filter(x=>x.fecha!==f);
+ state.logs.push(entry);
+ state.logs.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+ guardar();
+ mostrarProgreso();
+ alert("Tu registro quedó guardado 💗");
+}
+function mostrarProgreso(){
+ diasRegistrados.textContent=Object.keys(state.daily).length;
+ const ultimo=[...state.logs].reverse().find(x=>x.peso);
+ pesoActual.textContent=ultimo?ultimo.peso+" kg":"—";
+ historial.innerHTML=state.logs.length
+  ?[...state.logs].reverse().map(x=>`
+   <div class="meal">
+    <strong>${seguro(x.fecha)}</strong>
+    <p>Peso: ${seguro(x.peso||"—")} kg</p>
+    <p>Glucosa: ${seguro(x.glucosa||"—")} mg/dL</p>
+    <p>Presión: ${seguro(x.sistolica||"—")}/${seguro(x.diastolica||"—")}</p>
+    <p>${seguro(x.logro)}</p>
+    <button onclick="eliminarRegistro('${x.fecha}')">Eliminar</button>
+   </div>`).join("")
+  :"<p>Tu primer registro será el comienzo de tu historial.</p>";
+}
+function eliminarRegistro(fecha){
+ if(!confirm("¿Eliminar este registro?"))return;
+ state.logs=state.logs.filter(x=>x.fecha!==fecha);
+ guardar();mostrarProgreso();
+}
+
+function exportar(){
+ const blob=new Blob([JSON.stringify({
+  app:"Mi Bienestar",version:1,data:state
+ },null,2)],{type:"application/json"});
+ const a=document.createElement("a");
+ const url=URL.createObjectURL(blob);
+ a.href=url;
+ a.download="mi-bienestar-respaldo-"+fechaLocal()+".json";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importar(event){
+ const file=event.target.files?.[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const contenido=JSON.parse(reader.result);
+   if(contenido.app!=="Mi Bienestar"||
+      !contenido.data||
+      !Array.isArray(contenido.data.logs)||
+      !contenido.data.daily||
+      typeof contenido.data.daily!=="object"){
+    throw new Error("El archivo no tiene el formato esperado.");
+   }
+   if(!confirm("¿Reemplazar tus registros por este respaldo?"))return;
+   state=contenido.data;
+   guardar();
+   actualizar();
+   alert("Respaldo restaurado.");
+  }catch(e){alert("No se pudo restaurar: "+e.message);}
+ };
+ reader.readAsText(file);
+ event.target.value="";
+}
+
+function actualizar(){
+ mostrarHoy();
+ mostrarMenu();
+ mostrarEjercicios();
+ mostrarProgreso();
+}
+
+compras.forEach(x=>{
+ const l=document.createElement("label");
+ l.className="check";
+ const c=document.createElement("input");
+ c.type="checkbox";
+ l.append(c,document.createTextNode(x));
+ document.getElementById("compras").appendChild(l);
+});
+
+registroFecha.value=fechaLocal();
+actualizar();
+</script>
+</body>
+</html>
